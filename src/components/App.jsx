@@ -3,6 +3,7 @@ import ContactForm from './ContactForm/ContactForm';
 import ContactList from './ContactList/ContactList';
 import Filter from './Filter/Filter';
 import { nanoid } from 'nanoid';
+const LS_KEY = 'allcontacts';
   
 export class App extends React.Component {
 
@@ -14,14 +15,11 @@ export class App extends React.Component {
           {id: 'id-4', name: 'Annie Copeland', number: '227-91-26'},
     ],
     filter:'',
-        // name: '',
-        // number:'',
   }
-  // formSubmitHandler = data => {
-  //   console.log(data);
-  // }
+ 
+  
   AddContact = text => {
-    //console.log(text);
+    
     if (this.state.contacts.find(contact => contact.name === text.name)) {
       alert(`${text.name} is already in contacts`);
       return false;
@@ -34,12 +32,25 @@ export class App extends React.Component {
     this.setState(prevState => ({
       contacts: [contact,...prevState.contacts]
     }))
+    const arrContacts = JSON.parse(localStorage.getItem(LS_KEY)) || [];
+    arrContacts.push(contact);
+    localStorage.setItem(LS_KEY, JSON.stringify(arrContacts));
     return true;
   }
   deleteContact = (contactId) => {
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(contact=>contact.id !==contactId),
     }));
+    localStorage.setItem(LS_KEY, JSON.stringify(this.state.contacts));
+  }
+  componentDidUpdate(prevProps, prevState) {
+
+    localStorage.setItem(LS_KEY, JSON.stringify(this.state.contacts));
+  }
+  componentDidMount() {
+    this.setState({
+      contacts:JSON.parse(localStorage.getItem(LS_KEY))||[]
+    })
   }
   changeFilter = event => {
     this.setState({
@@ -51,7 +62,6 @@ export class App extends React.Component {
     const { filter } = this.state;
     const normalizedFilter = this.state.filter.toLowerCase();
     const visibleContacts = this.state.contacts.filter(contact => contact.name.toLowerCase().includes(normalizedFilter));
-   // console.log(filter);
     return (
       <div>
         <h1>Phonebook</h1>
